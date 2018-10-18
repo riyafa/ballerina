@@ -15,9 +15,10 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.ballerinalang.net.http;
+package org.ballerinalang.net.websocket;
 
 import org.ballerinalang.connector.api.BallerinaConnectorException;
+import org.ballerinalang.logging.util.Constants;
 import org.wso2.transport.http.netty.contract.HttpWsConnectorFactory;
 import org.wso2.transport.http.netty.contract.ServerConnector;
 import org.wso2.transport.http.netty.contract.config.ListenerConfiguration;
@@ -34,9 +35,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.ballerinalang.logging.util.Constants.HTTP_ACCESS_LOG_ENABLED;
-import static org.ballerinalang.logging.util.Constants.HTTP_TRACE_LOG_ENABLED;
-
 /**
  * {@code HttpConnectionManager} is responsible for managing all the server connectors with ballerina runtime.
  *
@@ -49,7 +47,7 @@ public class HttpConnectionManager {
     private Map<String, HttpServerConnectorContext> serverConnectorPool = new HashMap<>();
     private ServerBootstrapConfiguration serverBootstrapConfiguration;
     private TransportsConfiguration trpConfig;
-    private HttpWsConnectorFactory httpConnectorFactory = HttpUtil.createHttpWsConnectionFactory();
+    private HttpWsConnectorFactory httpConnectorFactory = WebSocketUtil.createHttpWsConnectionFactory();
 
     private HttpConnectionManager() {
         trpConfig = buildDefaultTransportConfig();
@@ -157,11 +155,11 @@ public class HttpConnectionManager {
     }
 
     public boolean isHTTPTraceLoggerEnabled() {
-        return Boolean.parseBoolean(System.getProperty(HTTP_TRACE_LOG_ENABLED));
+        return Boolean.parseBoolean(System.getProperty(Constants.HTTP_TRACE_LOG_ENABLED));
     }
 
     private boolean isHTTPAccessLoggerEnabled() {
-        return Boolean.parseBoolean(System.getProperty(HTTP_ACCESS_LOG_ENABLED));
+        return Boolean.parseBoolean(System.getProperty(Constants.HTTP_ACCESS_LOG_ENABLED));
     }
 
     private TransportsConfiguration buildDefaultTransportConfig() {

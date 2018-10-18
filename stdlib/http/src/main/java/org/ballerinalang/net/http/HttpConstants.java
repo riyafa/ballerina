@@ -49,9 +49,7 @@ public class HttpConstants {
     public static final String PROTOCOL_HTTP = "http";
     public static final String PROTOCOL_PACKAGE_HTTP = "ballerina" + ORG_NAME_SEPARATOR + "http";
     public static final String HTTP_SERVICE_ENDPOINT_NAME = "ballerina" + ORG_NAME_SEPARATOR + "http:Listener";
-    public static final String PROTOCOL_HTTPS = "https";
     public static final String HTTP_METHOD = "HTTP_METHOD";
-    public static final String HTTP_STATUS_CODE = "HTTP_STATUS_CODE";
     public static final String RESOLVED_REQUESTED_URI = "RESOLVED_REQUESTED_URI";
     public static final String HTTP_REASON_PHRASE = "HTTP_REASON_PHRASE";
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
@@ -60,12 +58,7 @@ public class HttpConstants {
     public static final String LOCAL_ADDRESS = "LOCAL_ADDRESS";
     public static final String HTTP_VERSION = "HTTP_VERSION";
     public static final String LISTENER_PORT = "LISTENER_PORT";
-    public static final String HTTP_DEFAULT_HOST = "0.0.0.0";
     public static final String TLS_STORE_TYPE = "tlsStoreType";
-    public static final String PKCS_STORE_TYPE = "PKCS12";
-    public static final String AUTO = "AUTO";
-    public static final String ALWAYS = "ALWAYS";
-    public static final String NEVER = "NEVER";
     public static final String FORWARDED_ENABLE = "enable";
     public static final String FORWARDED_TRANSITION = "transition";
     public static final String FORWARDED_DISABLE = "disable";
@@ -92,7 +85,6 @@ public class HttpConstants {
     public static final String ANN_RESOURCE_ATTR_CONSUMES = "consumes";
     public static final String ANN_RESOURCE_ATTR_PRODUCES = "produces";
     public static final String ANN_NAME_CONFIG = "configuration";
-    public static final String ANN_NAME_HTTP_SERVICE_CONFIG = "ServiceConfig";
     public static final String ANN_CONFIG_ATTR_HOST = "host";
     public static final String ANN_CONFIG_ATTR_PORT = "port";
     public static final String ANN_CONFIG_ATTR_HTTP_VERSION = "httpVersion";
@@ -177,7 +169,6 @@ public class HttpConstants {
     public static final String REMOTE = "Remote";
     public static final String LOCAL = "Local";
     public static final String REQUEST = "Request";
-    public static final String RESPONSE = "Response";
     public static final String HTTP_FUTURE = "HttpFuture";
     public static final String PUSH_PROMISE = "PushPromise";
     public static final String ENTITY = "Entity";
@@ -186,15 +177,12 @@ public class HttpConstants {
     public static final String STRUCT_GENERIC_ERROR = "error";
     public static final String HTTP_TIMEOUT_ERROR = "HttpTimeoutError";
     public static final String TYPE_STRING = "string";
-    public static final String TRANSPORT_MESSAGE = "transport_message";
     public static final String TRANSPORT_HANDLE = "transport_handle";
     public static final String TRANSPORT_PUSH_PROMISE = "transport_push_promise";
     public static final String MESSAGE_OUTPUT_STREAM = "message_output_stream";
     public static final String HTTP_SESSION = "http_session";
 
     public static final String HTTP_TRANSPORT_CONF = "transports.netty.conf";
-    public static final String CIPHERS = "ciphers";
-    public static final String SSL_ENABLED_PROTOCOLS = "sslEnabledProtocols";
     public static final int OPTIONS_STRUCT_INDEX = 0;
 
     public static final int HTTP_MESSAGE_INDEX = 0;
@@ -203,7 +191,6 @@ public class HttpConstants {
     // ServeConnector struct indices
     public static final String HTTP_CONNECTOR_CONFIG_FIELD = "config";
     public static final String SERVICE_ENDPOINT_CONFIG_FIELD = "config";
-    public static final String SERVICE_ENDPOINT_CONNECTION_FIELD = "conn";
 
     //Connection struct indexes
     public static final int CONNECTION_HOST_INDEX = 0;
@@ -218,10 +205,6 @@ public class HttpConstants {
     public static final String REQUEST_CACHE_CONTROL_FIELD = "cacheControl";
 
     //Response struct field names
-    public static final String RESPONSE_STATUS_CODE_FIELD = "statusCode";
-    public static final String RESPONSE_REASON_PHRASE_FIELD = "reasonPhrase";
-    public static final String RESPONSE_SERVER_FIELD = "server";
-    public static final String RESOLVED_REQUESTED_URI_FIELD = "resolvedRequestedURI";
     public static final String RESPONSE_CACHE_CONTROL_FIELD = "cacheControl";
     public static final String IN_RESPONSE_RECEIVED_TIME_FIELD = "receivedTime";
 
@@ -278,54 +261,15 @@ public class HttpConstants {
     public static final String HEADER_X_REGISTER_AT_URL = "x-b7a-register-at";
 
 
-    public static final String HTTP_SERVER_CONNECTOR = "HTTP_SERVER_CONNECTOR";
     public static final String HTTP_SERVICE_REGISTRY = "HTTP_SERVICE_REGISTRY";
-    public static final String WS_SERVICE_REGISTRY = "WS_SERVICE_REGISTRY";
-    public static final String CONNECTOR_STARTED = "CONNECTOR_STARTED";
 
     //Service Endpoint
     public static final int SERVICE_ENDPOINT_NAME_INDEX = 0;
-    public static final String SERVICE_ENDPOINT_CONFIG = "config";
 
     //Service Endpoint Config
-    public static final String ENDPOINT_CONFIG_HOST = "host";
-    public static final String ENDPOINT_CONFIG_PORT = "port";
-    public static final String ENDPOINT_CONFIG_KEEP_ALIVE = "keepAlive";
-    public static final String ENDPOINT_CONFIG_TIMEOUT = "timeoutMillis";
     public static final String ENDPOINT_CONFIG_CHUNKING = "chunking";
-    public static final String ENDPOINT_CONFIG_VERSION = "httpVersion";
-    public static final String ENDPOINT_REQUEST_LIMITS = "requestLimits";
-    public static final String REQUEST_LIMITS_MAXIMUM_URL_LENGTH = "maxUriLength";
-    public static final String REQUEST_LIMITS_MAXIMUM_HEADER_SIZE = "maxHeaderSize";
-    public static final String REQUEST_LIMITS_MAXIMUM_ENTITY_BODY_SIZE = "maxEntityBodySize";
     public static final String ENDPOINT_CONFIG_PIPELINING = "pipelining";
     public static final String ENABLE_PIPELINING = "enable";
-    public static final String PIPELINING_REQUEST_LIMIT = "maxPipelinedRequests";
-
-    public static final String ENDPOINT_CONFIG_SECURE_SOCKET = "secureSocket";
-
-    public static final String ENDPOINT_CONFIG_TRUST_STORE = "trustStore";
-    public static final String FILE_PATH = "path";
-    public static final String PASSWORD = "password";
-    public static final String PROTOCOL_VERSION = "name";
-    public static final String ENABLED_PROTOCOLS = "versions";
-    public static final String ENABLE = "enable";
-    public static final String ENDPOINT_CONFIG_OCSP_STAPLING = "ocspStapling";
-    public static final String ENDPOINT_CONFIG_KEY_STORE = "keyStore";
-    public static final String ENDPOINT_CONFIG_PROTOCOLS = "protocol";
-    public static final String ENDPOINT_CONFIG_VALIDATE_CERT = "certValidation";
-    public static final String ENDPOINT_CONFIG_CERTIFICATE = "certFile";
-    public static final String ENDPOINT_CONFIG_KEY = "keyFile";
-    public static final String ENDPOINT_CONFIG_KEY_PASSWORD = "keyPassword";
-    public static final String ENDPOINT_CONFIG_TRUST_CERTIFICATES = "trustedCertFile";
-
-    //SslConfiguration indexes
-    public static final String SSL_CONFIG_SSL_VERIFY_CLIENT = "sslVerifyClient";
-    public static final String SSL_CONFIG_CIPHERS = "ciphers";
-    public static final String SSL_CONFIG_CACHE_SIZE = "cacheSize";
-    public static final String SSL_CONFIG_CACHE_VALIDITY_PERIOD = "cacheValidityPeriod";
-    public static final String SSL_CONFIG_HOST_NAME_VERIFICATION_ENABLED = "verifyHostname";
-    public static final String SSL_CONFIG_ENABLE_SESSION_CREATION = "shareSession";
 
     //Client Endpoint (CallerActions)
     public static final String CLIENT_ENDPOINT_SERVICE_URI = "serviceUri";

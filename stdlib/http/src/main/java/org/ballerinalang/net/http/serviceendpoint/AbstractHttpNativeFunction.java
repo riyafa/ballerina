@@ -18,19 +18,6 @@ public abstract class AbstractHttpNativeFunction extends BlockingNativeCallableU
         return (HTTPServicesRegistry) serviceEndpoint.getNativeData(HttpConstants.HTTP_SERVICE_REGISTRY);
     }
 
-    protected WebSocketServicesRegistry getWebSocketServicesRegistry(Struct serviceEndpoint) {
-        return (WebSocketServicesRegistry) serviceEndpoint.getNativeData(HttpConstants.WS_SERVICE_REGISTRY);
-    }
-
-    protected ServerConnector getServerConnector(Struct serviceEndpoint) {
-        return (ServerConnector) serviceEndpoint.getNativeData(HttpConstants.HTTP_SERVER_CONNECTOR);
-    }
-
-    protected boolean isConnectorStarted(Struct serviceEndpoint) {
-        return serviceEndpoint.getNativeData(HttpConstants.CONNECTOR_STARTED) != null &&
-                (Boolean) serviceEndpoint.getNativeData(HttpConstants.CONNECTOR_STARTED);
-    }
-
     protected void resetRegistry(Struct serviceEndpoint) {
         WebSocketServicesRegistry webSocketServicesRegistry = new WebSocketServicesRegistry();
         HTTPServicesRegistry httpServicesRegistry = new HTTPServicesRegistry(webSocketServicesRegistry);

@@ -715,28 +715,6 @@ public class HttpUtil {
     }
 
     /**
-     * Populate entity with headers, content-type and content-length.
-     *
-     * @param entity    Represent an entity struct
-     * @param mediaType mediaType struct that needs to be set to the entity
-     * @param cMsg      Represent a carbon message
-     */
-    private static void populateEntity(BMap<String, BValue> entity, BMap<String, BValue> mediaType,
-                                       HttpCarbonMessage cMsg) {
-        String contentType = cMsg.getHeader(HttpHeaderNames.CONTENT_TYPE.toString());
-        MimeUtil.setContentType(mediaType, entity, contentType);
-        long contentLength = -1;
-        String lengthStr = cMsg.getHeader(HttpHeaderNames.CONTENT_LENGTH.toString());
-        try {
-            contentLength = lengthStr != null ? Long.parseLong(lengthStr) : contentLength;
-            MimeUtil.setContentLength(entity, contentLength);
-        } catch (NumberFormatException e) {
-            throw new BallerinaException("Invalid content length");
-        }
-        entity.addNativeData(ENTITY_HEADERS, cMsg.getHeaders());
-    }
-
-    /**
      * Set headers and properties of request/response struct to the outbound transport message.
      *
      * @param outboundMsg    transport Http carbon message.
@@ -900,11 +878,6 @@ public class HttpUtil {
         return valuesList;
     }
 
-    public static String getListenerInterface(String host, int port) {
-        host = host != null ? host : "0.0.0.0";
-        return host + ":" + port;
-    }
-
     public static ChunkConfig getChunkConfig(String chunkConfig) {
         switch (chunkConfig) {
             case HttpConstants.AUTO:
@@ -916,20 +889,6 @@ public class HttpUtil {
             default:
                 throw new BallerinaConnectorException(
                         "Invalid configuration found for Transfer-Encoding: " + chunkConfig);
-        }
-    }
-
-    public static KeepAliveConfig getKeepAliveConfig(String keepAliveConfig) {
-        switch (keepAliveConfig) {
-            case HttpConstants.AUTO:
-                return KeepAliveConfig.AUTO;
-            case HttpConstants.ALWAYS:
-                return KeepAliveConfig.ALWAYS;
-            case NEVER:
-                return KeepAliveConfig.NEVER;
-            default:
-                throw new BallerinaConnectorException(
-                        "Invalid configuration found for Keep-Alive: " + keepAliveConfig);
         }
     }
 
@@ -1098,10 +1057,6 @@ public class HttpUtil {
         return boundaryString;
     }
 
-    public static HttpWsConnectorFactory createHttpWsConnectionFactory() {
-        return new DefaultHttpWsConnectorFactory();
-    }
-
     public static void checkAndObserveHttpRequest(Context context, HttpCarbonMessage message) {
         Optional<ObserverContext> observerContext = ObservabilityUtils.getParentContext(context);
         observerContext.ifPresent(ctx -> {
@@ -1157,110 +1112,6 @@ public class HttpUtil {
         HttpUtil.populateInboundResponse(responseStruct, entity, mediaType, context.getProgramFile(),
                 httpCarbonMessage);
         return responseStruct;
-    }
-
-    public static void populateSSLConfiguration(SslConfiguration sslConfiguration, Struct secureSocket) {
-        Struct trustStore = secureSocket.getStructField(ENDPOINT_CONFIG_TRUST_STORE);
-        Struct keyStore = secureSocket.getStructField(ENDPOINT_CONFIG_KEY_STORE);
-        Struct protocols = secureSocket.getStructField(ENDPOINT_CONFIG_PROTOCOLS);
-        Struct validateCert = secureSocket.getStructField(ENDPOINT_CONFIG_VALIDATE_CERT);
-        String keyFile = secureSocket.getStringField(ENDPOINT_CONFIG_KEY);
-        String certFile = secureSocket.getStringField(ENDPOINT_CONFIG_CERTIFICATE);
-        String trustCerts = secureSocket.getStringField(ENDPOINT_CONFIG_TRUST_CERTIFICATES);
-        String keyPassword = secureSocket.getStringField(ENDPOINT_CONFIG_KEY_PASSWORD);
-        List<Parameter> clientParams = new ArrayList<>();
-        if (trustStore != null && StringUtils.isNotBlank(trustCerts)) {
-            throw new BallerinaException("Cannot configure both trustStore and trustCerts at the same time.");
-        }
-        if (trustStore != null) {
-            String trustStoreFile = trustStore.getStringField(FILE_PATH);
-            if (StringUtils.isNotBlank(trustStoreFile)) {
-                sslConfiguration.setTrustStoreFile(trustStoreFile);
-            }
-            String trustStorePassword = trustStore.getStringField(PASSWORD);
-            if (StringUtils.isNotBlank(trustStorePassword)) {
-                sslConfiguration.setTrustStorePass(trustStorePassword);
-            }
-        } else if (StringUtils.isNotBlank(trustCerts)) {
-            sslConfiguration.setClientTrustCertificates(trustCerts);
-        }
-        if (keyStore != null && StringUtils.isNotBlank(keyFile)) {
-            throw new BallerinaException("Cannot configure both keyStore and keyFile.");
-        } else if (StringUtils.isNotBlank(keyFile) && StringUtils.isBlank(certFile)) {
-            throw new BallerinaException("Need to configure certFile containing client ssl certificates.");
-        }
-        if (keyStore != null) {
-            String keyStoreFile = keyStore.getStringField(FILE_PATH);
-            if (StringUtils.isNotBlank(keyStoreFile)) {
-                sslConfiguration.setKeyStoreFile(keyStoreFile);
-            }
-            String keyStorePassword = keyStore.getStringField(PASSWORD);
-            if (StringUtils.isNotBlank(keyStorePassword)) {
-                sslConfiguration.setKeyStorePass(keyStorePassword);
-            }
-        } else if (StringUtils.isNotBlank(keyFile)) {
-            sslConfiguration.setClientKeyFile(keyFile);
-            sslConfiguration.setClientCertificates(certFile);
-            if (StringUtils.isNotBlank(keyPassword)) {
-                sslConfiguration.setClientKeyPassword(keyPassword);
-            }
-        }
-        if (protocols != null) {
-            List<Value> sslEnabledProtocolsValueList = Arrays
-                    .asList(protocols.getArrayField(ENABLED_PROTOCOLS));
-            if (sslEnabledProtocolsValueList.size() > 0) {
-                String sslEnabledProtocols = sslEnabledProtocolsValueList.stream().map(Value::getStringValue)
-                        .collect(Collectors.joining(",", "", ""));
-                Parameter clientProtocols = new Parameter(SSL_ENABLED_PROTOCOLS, sslEnabledProtocols);
-                clientParams.add(clientProtocols);
-            }
-            String sslProtocol = protocols.getStringField(PROTOCOL_VERSION);
-            if (StringUtils.isNotBlank(sslProtocol)) {
-                sslConfiguration.setSSLProtocol(sslProtocol);
-            }
-        }
-
-        if (validateCert != null) {
-            boolean validateCertEnabled = validateCert.getBooleanField(HttpConstants.ENABLE);
-            int cacheSize = (int) validateCert.getIntField(HttpConstants.SSL_CONFIG_CACHE_SIZE);
-            int cacheValidityPeriod = (int) validateCert
-                    .getIntField(HttpConstants.SSL_CONFIG_CACHE_VALIDITY_PERIOD);
-            sslConfiguration.setValidateCertEnabled(validateCertEnabled);
-            if (cacheValidityPeriod != 0) {
-                sslConfiguration.setCacheValidityPeriod(cacheValidityPeriod);
-            }
-            if (cacheSize != 0) {
-                sslConfiguration.setCacheSize(cacheSize);
-            }
-        }
-        boolean hostNameVerificationEnabled = secureSocket
-                .getBooleanField(HttpConstants.SSL_CONFIG_HOST_NAME_VERIFICATION_ENABLED);
-        boolean ocspStaplingEnabled = secureSocket.getBooleanField(HttpConstants.ENDPOINT_CONFIG_OCSP_STAPLING);
-        sslConfiguration.setOcspStaplingEnabled(ocspStaplingEnabled);
-        sslConfiguration.setHostNameVerificationEnabled(hostNameVerificationEnabled);
-
-        List<Value> ciphersValueList = Arrays
-                .asList(secureSocket.getArrayField(HttpConstants.SSL_CONFIG_CIPHERS));
-        if (ciphersValueList.size() > 0) {
-            String ciphers = ciphersValueList.stream().map(Value::getStringValue)
-                    .collect(Collectors.joining(",", "", ""));
-            Parameter clientCiphers = new Parameter(HttpConstants.CIPHERS, ciphers);
-            clientParams.add(clientCiphers);
-        }
-        String enableSessionCreation = String.valueOf(secureSocket
-                .getBooleanField(HttpConstants.SSL_CONFIG_ENABLE_SESSION_CREATION));
-        Parameter clientEnableSessionCreation = new Parameter(HttpConstants.SSL_CONFIG_ENABLE_SESSION_CREATION,
-                enableSessionCreation);
-        clientParams.add(clientEnableSessionCreation);
-        if (!clientParams.isEmpty()) {
-            sslConfiguration.setParameters(clientParams);
-        }
-    }
-
-    public static void setDefaultTrustStore(SslConfiguration sslConfiguration) {
-        sslConfiguration.setTrustStoreFile(String.valueOf(
-                Paths.get(System.getProperty("ballerina.home"), "bre", "security", "ballerinaTruststore.p12")));
-        sslConfiguration.setTrustStorePass("ballerina");
     }
 
     public static String sanitizeBasePath(String basePath) {
