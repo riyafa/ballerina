@@ -108,60 +108,6 @@ public type Compression "AUTO" | "ALWAYS" | "NEVER";
 # `NONE`: No operation should be performed
 public type HttpOperation "FORWARD" | "GET" | "POST" | "DELETE" | "OPTIONS" | "PUT" | "PATCH" | "HEAD" | "NONE";
 
-# A record for providing trust store related configurations.
-#
-# + path - Path to the trust store file
-# + password - Trust store password
-public type TrustStore record {
-    string path;
-    string password;
-    !...
-};
-
-# A record for providing key store related configurations.
-#
-# + path - Path to the key store file
-# + password - Key store password
-public type KeyStore record {
-    string path;
-    string password;
-    !...
-};
-
-# A record for configuring SSL/TLS protocol and version to be used.
-#
-# + name - SSL Protocol to be used (e.g.: TLS1.2)
-# + versions - SSL/TLS protocols to be enabled (e.g.: TLSv1,TLSv1.1,TLSv1.2)
-public type Protocols record {
-    string name;
-    string[] versions;
-    !...
-};
-
-# A record for providing configurations for certificate revocation status checks.
-#
-# + enable - The status of `validateCertEnabled`
-# + cacheSize - Maximum size of the cache
-# + cacheValidityPeriod - The time period for which a cache entry is valid
-public type ValidateCert record {
-    boolean enable;
-    int cacheSize;
-    int cacheValidityPeriod;
-    !...
-};
-
-# A record for providing configurations for certificate revocation status checks.
-#
-# + enable - The status of OCSP stapling
-# + cacheSize - Maximum size of the cache
-# + cacheValidityPeriod - The time period for which a cache entry is valid
-public type ServiceOcspStapling record {
-    boolean enable;
-    int cacheSize;
-    int cacheValidityPeriod;
-    !...
-};
-
 # A record for providing configurations for content compression.
 #
 # + enable - The status of compression

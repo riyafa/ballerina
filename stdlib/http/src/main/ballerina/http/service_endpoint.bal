@@ -122,37 +122,6 @@ public type ServiceEndpointConfiguration record {
     !...
 };
 
-# Configures the SSL/TLS options to be used for HTTP service.
-#
-# + trustStore - Configures the trust store to be used
-# + keyStore - Configures the key store to be used
-# + certFile - A file containing the certificate of the server
-# + keyFile - A file containing the private key of the server
-# + keyPassword - Password of the private key if it is encrypted
-# + trustedCertFile - A file containing a list of certificates or a single certificate that the server trusts
-# + protocol - SSL/TLS protocol related options
-# + certValidation - Certificate validation against CRL or OCSP related options
-# + ciphers - List of ciphers to be used (e.g.: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-#             TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA)
-# + sslVerifyClient - The type of client certificate verification
-# + shareSession - Enable/disable new SSL session creation
-# + ocspStapling - Enable/disable OCSP stapling
-public type ServiceSecureSocket record {
-    TrustStore? trustStore;
-    KeyStore? keyStore;
-    string certFile;
-    string keyFile;
-    string keyPassword;
-    string trustedCertFile;
-    Protocols? protocol;
-    ValidateCert? certValidation;
-    string[] ciphers;
-    string sslVerifyClient;
-    boolean shareSession = true;
-    ServiceOcspStapling? ocspStapling;
-    !...
-};
-
 # Defines the possible values for the keep-alive configuration in service and client endpoints.
 public type KeepAlive "AUTO"|"ALWAYS"|"NEVER";
 
