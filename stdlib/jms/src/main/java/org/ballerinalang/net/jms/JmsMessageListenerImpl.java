@@ -27,6 +27,7 @@ import org.ballerinalang.jvm.values.ErrorValue;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.jvm.values.connector.CallableUnitCallback;
 import org.ballerinalang.jvm.values.connector.Executor;
+import org.ballerinalang.net.jms.utils.JmsUtils;
 
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -37,18 +38,15 @@ import javax.jms.MessageListener;
 public class JmsMessageListenerImpl implements MessageListener {
 
     private ObjectValue service;
-    private ObjectValue queueConsumerBObject;
     private Scheduler scheduler;
     private AttachedFunction resource;
     private ObjectValue sessionObj;
 
     private ResponseCallback callback;
 
-    public JmsMessageListenerImpl(Scheduler scheduler, ObjectValue service, ObjectValue queueConsumerBObject,
-                                  ObjectValue sessionObj) {
+    public JmsMessageListenerImpl(Scheduler scheduler, ObjectValue service, ObjectValue sessionObj) {
         this.scheduler = scheduler;
         this.service = service;
-        this.queueConsumerBObject = queueConsumerBObject;
         this.callback = new ResponseCallback();
         resource = service.getType().getAttachedFunctions()[0];
         this.sessionObj = sessionObj;
@@ -64,11 +62,8 @@ public class JmsMessageListenerImpl implements MessageListener {
         BType[] parameterTypes = resource.getParameterType();
 
         Object[] bValues = new Object[parameterTypes.length * 2];
-
-        bValues[0] = queueConsumerBObject;
+        bValues[0] = messageObj;
         bValues[1] = true;
-        bValues[2] = messageObj;
-        bValues[3] = true;
         return bValues;
     }
 

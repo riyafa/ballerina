@@ -121,8 +121,8 @@ public type Message client object {
 };
 
 # The type that represents the union of the allowed types for the `Message`
-public type MessageContent int | float | byte | boolean | string | map<string | byte | int | float | boolean | byte[] |
-    ()> | xml | json | byte[];
+public type MessageContent int | float | byte | boolean | string | map<string | byte | int | float | boolean | byte[] | ()>
+ | xml | json | byte[];
 
 # The JMS message types.
 public type MessageType MESSAGE | TEXT_MESSAGE | BYTES_MESSAGE | STREAM_MESSAGE | MAP_MESSAGE;
@@ -176,13 +176,3 @@ public type Headers record {|
    boolean redelivered;
    int priority;
 |};
-
-# The two types of delivery modes in JMS.
-public type DeliveryMode PERSISTENT | NON_PERSISTENT;
-
-# A persistent message is delivered once-and-only-once which means that if the JMS provider fails,
-# the message is not lost; it will be delivered after the server recovers.
-public const PERSISTENT = "PERSISTENT";
-# A non-persistent message is delivered at-most-once which means that it can be lost permanently if the JMS
-# provider fails.
-public const NON_PERSISTENT = "NON_PERSISTENT";

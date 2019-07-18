@@ -36,7 +36,7 @@ listener jms:QueueListener consumerEP = new({
 service jmsListener on consumerEP {
 
     // The `OnMessage` resource gets invoked when a message is received.
-    resource function onMessage(jms:QueueReceiverCaller consumer, jms:Message message) {
+    resource function onMessage(jms:QueueReceiver consumer, jms:Message message) {
         var msg = message.getTextMessageContent();
         if (msg is string) {
             log:printInfo("Message : " + msg);
@@ -102,7 +102,7 @@ listener jms:QueueListener consumerEP = new(jmsSession, queueName = "MyQueue");
 service jmsListener on consumerEP {
 
     // The `OnMessage` resource gets invoked when a message is received.
-    resource function onMessage(jms:QueueReceiverCaller consumer, jms:Message message) {
+    resource function onMessage(jms:QueueReceiver consumer, jms:Message message) {
         // Retrieve the text message.
         var msg = message.getTextMessageContent();
         if (msg is string) {

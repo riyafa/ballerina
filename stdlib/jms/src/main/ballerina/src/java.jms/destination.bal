@@ -14,31 +14,25 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Defines the possible values for the destination type in JMS `Destination`.
-#
-# `queue`: Destination type queue
-# `topic`: Destination type topic
-public type DestinationType "queue"|"topic";
-
-# Constant for JMS destination type queue
-public const QUEUE = "queue";
-
-# Constant for JMS destination type topic
-public const TOPIC = "topic";
-
 # Destination object
 #
 # + destinationName - Name of the destination
 # + destinationType - Type of the destination (either queue or topic)
 public type Destination object {
     private string destinationName;
-    private string destinationType;
+    private DestinationType destinationType;
+    private Session session;
 
     // This object is constructed as package private as it needs to be created using the session.
-    function __init(string destName, string destType) {
-        self.destinationName = destName;
-        self.destinationType = destType;
+    public function __init(public Session session, public string destinationName, 
+        public DestinationType destinationType) returns error? {
+        self.session = session;
+        self.destinationName = destinationName;
+        self.destinationType = destinationType;
+        self.init();
     }
+
+    private function init() returns error? = external;
 
     public function getName() returns string {
         return self.destinationName;
@@ -48,3 +42,12 @@ public type Destination object {
         return self.destinationType;
     }
 };
+
+# Defines the possible values for the destination type in JMS `Destination`.
+public type DestinationType QUEUE | TOPIC;
+
+# Constant for JMS destination type queue
+public const QUEUE = "QUEUE";
+# Constant for JMS destination type topic
+public const TOPIC = "TOPIC";
+

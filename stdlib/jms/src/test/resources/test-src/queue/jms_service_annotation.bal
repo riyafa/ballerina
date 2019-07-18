@@ -29,6 +29,6 @@ listener jms:QueueListener consumerEndpoint = new({
     }
 }
 service jmsConsumer on consumerEndpoint {
-    resource function onMessage(jms:QueueReceiverCaller consumer, jms:Message message) returns error? {
+    resource function onMessage(jms:QueueReceiver consumer, jms:Message message) returns error? {
     }
 }

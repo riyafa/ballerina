@@ -1,4 +1,4 @@
-// Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (config) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -19,17 +19,15 @@
 # + config - Stores the configurations related to a JMS session.
 public type Session object {
 
-    private SessionConfiguration config;
     private Connection conn;
 
     # The default constructor of the JMS session.
-    public function __init(Connection connection, SessionConfiguration c) {
-        self.config = c;
+    public function __init(Connection connection, SessionAcknowledgementMode ackMode = AUTO_ACKNOWLEDGE) returns error? {
         self.conn = connection;
-        self.initEndpoint(connection);
+        self.init(connection, ackMode);
     }
 
-    function initEndpoint(Connection connection) = external;
+    private function init(Connection connection, SessionAcknowledgementMode ackMode) = external;
 
     # Unsubscribes a durable subscription that has been created by a client.
     # It is erroneous for a client to delete a durable subscription while there is an active (not closed) consumer
@@ -39,34 +37,11 @@ public type Session object {
     # + subscriptionId - The name, which is used to identify the subscription.
     # + return - Cancels the subscription.
     public function unsubscribe(string subscriptionId) returns error? = external;
-
-    # Creates a JMS Queue, which can be used as temporary response destination.
-    #
-    # + return - Returns the JMS destination for a temporary queue or an error if it fails.
-    public function createTemporaryQueue() returns Destination|error = external;
-
-    # Creates a JMS Topic, which can be used as a temporary response destination.
-    #
-    # + return - Returns the JMS destination for a temporary topic or an error if it fails.
-    public function createTemporaryTopic() returns Destination|error = external;
-
-    # Creates a JMS Queue, which can be used with a message producer.
-    #
-    # + queueName - The name of the Queue.
-    # + return - Returns the JMS destination for a queue or an error if it fails.
-    public function createQueue(string queueName) returns Destination|error = external;
-
-    # Creates a JMS Topic, which can be used with a message producer.
-    #
-    # + topicName - The name of the Topic.
-    # + return - Returns the JMS destination for a topic or an error if it fails.
-    public function createTopic(string topicName) returns Destination|error = external;
 };
 
-# The Configurations that are related to a JMS session.
-#
-# + acknowledgementMode - Specifies the session mode that will be used. Valid values are "AUTO_ACKNOWLEDGE",
-#                         "CLIENT_ACKNOWLEDGE", "SESSION_TRANSACTED", and "DUPS_OK_ACKNOWLEDGE".
-public type SessionConfiguration record {|
-    string acknowledgementMode = "AUTO_ACKNOWLEDGE";
-|};
+public type SessionAcknowledgementMode AUTO_ACKNOWLEDGE  | CLIENT_ACKNOWLEDGE | DUPS_OK_ACKNOWLEDGE | SESSION_TRANSACTED;
+
+public const AUTO_ACKNOWLEDGE = "AUTO_ACKNOWLEDGE";
+public const CLIENT_ACKNOWLEDGE = "CLIENT_ACKNOWLEDGE";
+public const DUPS_OK_ACKNOWLEDGE = "DUPS_OK_ACKNOWLEDGE";
+public const SESSION_TRANSACTED  = "SESSION_TRANSACTED ";

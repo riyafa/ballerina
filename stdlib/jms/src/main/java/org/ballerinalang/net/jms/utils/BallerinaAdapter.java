@@ -28,8 +28,6 @@ import org.ballerinalang.net.jms.JmsConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.JMSException;
-
 /**
  * Adapter class use used to bridge the connector native codes and Ballerina API.
  */
@@ -50,7 +48,7 @@ public class BallerinaAdapter {
                                                  JmsConstants.JMS_ERROR_RECORD);
     }
 
-    public static ErrorValue getError(String errorMessage, JMSException e) {
+    public static ErrorValue getError(String errorMessage, Exception e) {
         LOGGER.error(errorMessage, e);
         return getError(errorMessage);
     }

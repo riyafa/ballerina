@@ -14,34 +14,109 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Configurations related to the sender
-#
-# + initialContextFactory - JMS provider specific inital context factory
-# + providerUrl - JMS provider specific provider URL used to configure a connection
-# + connectionFactoryName - JMS connection factory to be used in creating JMS connections
-# + acknowledgementMode - Specifies the session mode that will be used. Legal values are "AUTO_ACKNOWLEDGE",
-#                         "CLIENT_ACKNOWLEDGE", "SESSION_TRANSACTED" and "DUPS_OK_ACKNOWLEDGE"
-# + properties - Additional properties used when initializing the initial context
-public type SenderEndpointConfiguration record {|
-    string initialContextFactory = "bmbInitialContextFactory";
-    string providerUrl = "amqp://admin:admin@ballerina/default?brokerlist='tcp://localhost:5672'";
-    string connectionFactoryName = "ConnectionFactory";
-    string acknowledgementMode = "AUTO_ACKNOWLEDGE";
-    map<any> properties = {};
-|};
-
 # Configuration related to simple topic subscriber endpoint
 #
 # + initialContextFactory - JMS provider specific inital context factory
 # + providerUrl - JMS provider specific provider URL used to configure a connection
 # + connectionFactoryName - JMS connection factory to be used in creating JMS connections
-# + acknowledgementMode - Specifies the session mode that will be used. Legal values are "AUTO_ACKNOWLEDGE",
-#                         "CLIENT_ACKNOWLEDGE", "SESSION_TRANSACTED" and "DUPS_OK_ACKNOWLEDGE"
+# + acknowledgementMode - Specifies the `SessionAcknowledgementMode` that will be used.
 # + properties - Additional properties used when initializing the initial context
-public type ReceiverEndpointConfiguration record {|
-    string initialContextFactory = "bmbInitialContextFactory";
-    string providerUrl = "amqp://admin:admin@ballerina/default?brokerlist='tcp://localhost:5672'";
+public type EndpointConfiguration record {|
+    string initialContextFactory;
+    string providerUrl;
     string connectionFactoryName = "ConnectionFactory";
-    string acknowledgementMode = "AUTO_ACKNOWLEDGE";
+    SessionAcknowledgementMode acknowledgementMode = AUTO_ACKNOWLEDGE;
+    string username?;
+    string password?;
     map<any> properties = {};
 |};
+
+function getMessage(public string | byte[] |
+    map<string | byte | int | float | boolean | byte[] |()> | Message payload, CustomHeaders? headers = (), 
+    map<string | int | float | boolean | byte | json | xml>? properties = ()) returns Message|error? {
+    Message | error msg = new Message(self.session, MESSAGE);
+        if (message is string) {
+            msg = new Message(self.session, TEXT_MESSAGE);
+            check msg.setPayload(payload);
+        } else if (message is byte[]) {
+            msg = new Message(self.session, BYTES_MESSAGE);
+            check msg.setPayload(payload);
+        } else if (message is map<string | byte | int | float | boolean | byte[] |()>) {
+            msg = new Message(self.session, MAP_MESSAGE);
+            check msg.setPayload(payload);
+        } else {
+            msg = message;
+        }
+        if (msg is Message) {
+            if (headers != ()) {
+                check msg.setCustomHeaders(headers);
+            } 
+            if (properties != ()) {
+                foreach var [key,prop] in properties {
+                    check msg.setProperty(key, prop);
+                }
+            }
+            return msg;
+        }
+        return msg;
+}
+
+# The two types of delivery modes in JMS.
+public type DeliveryMode PERSISTENT | NON_PERSISTENT;
+
+# A persistent message is delivered once-and-only-once which means that if the JMS provider fails,
+# the message is not lost; it will be delivered after the server recovers.
+public const PERSISTENT = "PERSISTENT";
+# A non-persistent message is delivered at-most-once which means that it can be lost permanently if the JMS
+# provider fails.
+public const NON_PERSISTENT = "NON_PERSISTENT";
+
+public type SendConfiguration record {|
+    DeliveryMode deliveryMode = PERSISTENT;
+    int priority = 4;
+    int timeToLiveInMilliSeconds = 0;
+|};
+
+function validateQueue(Destination destination) returns error? {
+    validate(destination);
+    if (destination.getType() != QUEUE) {
+        string errorMessage = "Destination should should be a queue";
+        error err = error(JMS_ERROR_CODE, message = errorMessage);
+        panic err;
+    }
+}
+function validateTopic(Destination destination) returns error? {
+    validate(destination);
+     if (destination.getType() != TOPIC) {
+        string errorMessage = "Destination should should be a topic";
+        error err = error(JMS_ERROR_CODE, message = errorMessage);
+        return err;
+    }
+}
+
+function validate(Destination destination) returns error? {
+    if (destination.getName() == "") {
+        string errorMessage = "Destination name cannot be empty";
+        error queueReceiverConfigError = error(JMS_ERROR_CODE, message = errorMessage);
+        return queueReceiverConfigError;
+    }
+}
+
+function getQueueDestination(Destination|string queue) returns Destination | error {
+    if (queue is string) {
+        return new Destination(self.session, queueName, QUEUE);
+    } else {
+        check validateQueue(queue);
+        return queue;
+    }
+}
+
+function getTopicDestination(Destination|string topic) returns Destination | error {
+    if (topic is string) {
+        return new Destination(self.session, topic, TOPIC);
+    } else {
+        check validateTopic(topic);
+        return topic;
+    }
+}
+

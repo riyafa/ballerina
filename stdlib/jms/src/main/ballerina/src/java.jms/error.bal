@@ -14,11 +14,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-public const string JMS_ERROR_CODE = "{ballerina/jms}JMSError";
+public const string JMS_ERROR_CODE = "{ballerina/java.jms}Error";
 
 # JMS error record
 #
 # + message - Error message
-type JMSError record {|
+type Detail record {|
     string message;
+    error cause?;
 |};
+
+ public type Error error<JMS_ERROR_CODE, Detail>;

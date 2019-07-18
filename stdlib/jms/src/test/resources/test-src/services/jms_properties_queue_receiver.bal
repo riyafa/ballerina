@@ -14,7 +14,7 @@ listener jms:QueueListener queueConsumer3 = new(jmsSession3, "MyPropQueue");
 
 service jmsListener3 on queueConsumer3 {
 
-    resource function onMessage(jms:QueueReceiverCaller consumer, jms:Message message) {
+    resource function onMessage(jms:QueueReceiver consumer, jms:Message message) {
         var messageText = message.getPayload();
         var booleanVal = message.getProperty("booleanProp");
         if (booleanVal is boolean) {

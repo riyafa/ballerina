@@ -16,7 +16,7 @@ listener jms:QueueListener queueConsumer4 = new(jmsSession4, "MyQueue4");
 
 service jmsListener4 on queueConsumer4 {
 
-    resource function onMessage(jms:QueueReceiverCaller consumer , jms:Message message) {
+    resource function onMessage(jms:QueueReceiver consumer , jms:Message message) {
         var messageText = message.getPayload();
         if (messageText is string) {
              msgVal = <@untainted> messageText;

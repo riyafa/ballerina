@@ -16,52 +16,79 @@
 
 import ballerina/log;
 
-# JMS TopicPublisher endpoint
+# JMS Producer Endpoint
 #
-# + session - Session of the topic publisher
+# + session - Session of the queue sender
 public type TopicPublisher client object {
 
-    public Session session;
+    private Session session;
+    private Destination? dest;
 
-    # Initialize the TopicPublisher endpoint
+    # Initialize the Producer endpoint
     #
     # + c - The JMS Session object or Configurations related to the receiver
-    # + topicPattern - Topic name pattern
-    public function __init(Session|SenderEndpointConfiguration c, string? topicPattern = ()) {
-        if (c is Session) {
-            self.session = c;
+    # + queueName - Name of the target queue
+    public function __init(Session|EndpointConfiguration sessionOrEndpointConfig, public string|Destination? topic = (), public SendConfiguration config = {}) returns error? {
+        if (sessionOrEndpointConfig is Session) {
+            self.session = sessionOrEndpointConfig;
         } else {
             Connection conn = new({
-                    initialContextFactory: c.initialContextFactory,
-                    providerUrl: c.providerUrl,
-                    connectionFactoryName: c.connectionFactoryName,
-                    properties: c.properties
+                    initialContextFactory: sessionOrEndpointConfig.initialContextFactory,
+                    providerUrl: sessionOrEndpointConfig.providerUrl,
+                    connectionFactoryName: sessionOrEndpointConfig.connectionFactoryName,
+                    properties: sessionOrEndpointConfig.properties,
+                    username: sessionOrEndpointConfig["username"], 
+                    password: sessionOrEndpointConfig["password"]
                 });
             self.session = new Session(conn, {
-                    acknowledgementMode: c.acknowledgementMode
+                    acknowledgementMode: sessionOrEndpointConfig.acknowledgementMode
                 });
         }
-        if (topicPattern is string) {
-            self.initTopicPublisher(self.session, topicPattern);
+        if(topic!=()) {
+            dest = check getTopicDestination(topic);
+        }
+        init(config);
+    }
+
+    private function init(SendConfiguration config) returns error? = external;
+
+    # Sends a message to the JMS provider.
+    # If the `payload` is a `string` then a `TEXT_MESSAGE` would be sent.
+    # If the `payload` is a `byte[]` then a  `BYTES_MESSAGE` would be sent.
+    # If the `payload` is a `map` then a MAP_MESSAGE would be senst.
+    # If the `payload` is `Message` then it would be sent.
+    # 
+    # + payload - Message payload to be sent to the JMS provider
+    # + return - Error if unable to create or send the message to the queue
+    public remote function publish(public string | byte[] |
+    map<string | byte | int | float | boolean | byte[] |()> | Message payload, 
+    public SendConfiguration config = {}, public CustomHeaders? headers = (), 
+    public map<string | int | float | boolean | byte | json | xml>? properties = ()) returns error? {
+        if(dest == ()) {
+            Error err = error(JMS_ERROR_CODE, message = "The destination is not specified when creating the producer. Use sendTo function instead.");
+            return err;
+        } else {
+            self.externSend(check getMessage(payload, headers, properties), config);
         }
     }
 
-    public function initTopicPublisher(Session session, string|Destination dest) = external;
+    public remote function externSend(Message message, SendConfiguration config) returns error? = external;
 
-    # Sends a message to the JMS provider
-    #
-    # + message - Message to be sent to the JMS provider
-    # + return - Error upon failure to send the message to the JMS provider
-    public remote function send(Message message) returns error? = external;
-
-    # Sends a message to the JMS provider
+    # Sends a message to a given destination of the JMS provider
     #
     # + destination - Destination used for the message sender
     # + message - Message to be sent to the JMS provider
-    # + return - Error upon failure to send the message to the JMS provider
-    public remote function sendTo(Destination destination, Message message) returns error? {
-        validateTopic(destination);
-        self.initTopicPublisher(self.session, destination);
-        return self->send(message);
+    # + return - Error if sending to the given destination fails
+    public remote function publishTo(string|Destination topic, public string | byte[] |
+    map<string | byte | int | float | boolean | byte[] |()> | Message payload, public SendConfiguration? config = {}, 
+    public CustomHeaders? headers = (), 
+    public map<string | int | float | boolean | byte | json | xml>? properties = ()) returns error? {
+        self.externSendTo(check getTopicDestination(topic), check getMessage(payload, headers, properties), config);
     }
+
+    public remote function externSendTo(Destination destination, Message message, SendConfiguration config) 
+    returns error? = external;
+
+    public remote function close() returns error? = external;
 };
+    

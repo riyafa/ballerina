@@ -19,15 +19,12 @@
 # + config - Used to store configurations related to a JMS Connection
 public type Connection object {
 
-    public ConnectionConfiguration config = {};
-
     # JMS Connection constructor
-    public function __init(ConnectionConfiguration c) {
-        self.config = c;
-        self.createConnection();
+    public function __init(ConnectionConfiguration config) returns error? {
+        return self.init(config);
     }
 
-    function createConnection() = external;
+    private function init(ConnectionConfiguration config) returns error? = external;
 
     # Starts (or restarts) a connection's delivery of incoming messages.
     # A call to start on a connection that has already been started is ignored.
@@ -47,10 +44,10 @@ public type Connection object {
 # + password - Password for the JMS connection
 # + properties - Additional properties use in initializing the initial context
 public type ConnectionConfiguration record {|
-    string initialContextFactory = "wso2mbInitialContextFactory";
-    string providerUrl = "amqp://admin:admin@ballerina/default?brokerlist='tcp://localhost:5672'";
+    string initialContextFactory;
+    string providerUrl;
     string connectionFactoryName = "ConnectionFactory";
-    string? username = ();
-    string? password = ();
+    string username?;
+    string password?;
     map<any> properties = {};
 |};

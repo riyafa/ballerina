@@ -31,7 +31,7 @@ jms:Session jmsSession = new (conn, {
 listener jms:QueueListener queueConsumer = new(jmsSession, "message_queue");
 
 service simpleConsumer on queueConsumer {
-    resource function onMessage(jms:QueueReceiverCaller consumer, jms:Message message) returns error? {
+    resource function onMessage(jms:QueueReceiver consumer, jms:Message message) returns error? {
         if (message.getType() == jms:TEXT_MESSAGE) {
             var payload = message.getPayload();
             if (payload is string) {

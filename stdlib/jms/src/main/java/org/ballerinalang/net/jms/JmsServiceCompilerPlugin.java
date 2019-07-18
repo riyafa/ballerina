@@ -64,22 +64,19 @@ public abstract class JmsServiceCompilerPlugin extends AbstractTransportCompiler
             dlog.logDiagnostic(Diagnostic.Kind.ERROR, resource.pos, "Invalid return type: expected error?");
         }
         List<BLangSimpleVariable> paramDetails = resource.getParameters();
-        if (paramDetails == null || paramDetails.size() != 2) {
+        if (paramDetails == null || paramDetails.size() != 1) {
             dlog.logDiagnostic(Diagnostic.Kind.ERROR, resource.pos, INVALID_RESOURCE_SIGNATURE_FOR
                     + resource.getName().getValue() +
-                    " resource: Unexpected parameter count(expected parameter count = 2)");
+                    " resource: Unexpected parameter count(expected parameter count = 1)");
             return;
         }
-        validateFirstParameter(resource, paramDetails);
-        if (!JmsConstants.MESSAGE_OBJ_FULL_NAME.equals(paramDetails.get(1).type.toString())) {
+        if (!JmsConstants.MESSAGE_OBJ_FULL_NAME.equals(paramDetails.get(0).type.toString())) {
             dlog.logDiagnostic(Diagnostic.Kind.ERROR, resource.pos,
                                INVALID_RESOURCE_SIGNATURE_FOR + resource.getName().getValue() +
                                        " resource: The second parameter should be " +
                                        JmsConstants.MESSAGE_OBJ_FULL_NAME);
         }
     }
-
-    protected abstract void validateFirstParameter(BLangFunction resource, List<BLangSimpleVariable> paramDetails);
 }
 
 

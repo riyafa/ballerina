@@ -14,56 +14,79 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# JMS consumer service object.
-# This has the capability to bind multiple types of JMS consumer endpoints.
-public type Consumer object {
+# The Caller actions related to queue receiver endpoint.
+#
+# + consumer - the QueueListener
+public type  Consumer client object {
+    private Session session;
+    private ConsumerConfiguration config;
 
-    # Returns the endpoint bound to service
-    #
-    # + return - JMS consumer endpoint bound to the service
-    public function getEndpoint() returns ConsumerTemplate {
-        ConsumerTemplate ct = new;
-        return ct;
+    public function __init(public Session session, public ConsumerConfiguration config = ()) returns error? {
+        self.session = session;
+        self.createConsumer(session);
+        if(config is ConsumerConfiguration) {
+            self.config = config;
+        } else {
+           self.config = {};
+        }
+        self.config.freeze();
+        if(config.destination != ()) {
+            return self.init();
+        }
     }
+
+    private function init() returns error? = external;
+
+    # Synchronously receives a message from the JMS provider.
+    #
+    # + timeoutInMilliSeconds - Time to wait until a message is received.
+    # + return - Returns a message or nil if the timeout exceeds, or returns an error upon an internal error of the JMS
+    #             provider.
+    public remote function receive(int timeoutInMilliSeconds = 0) returns Message|error? = external;
+
+    # Synchronously receives a message from a given destination.
+    #
+    # + destination - Destination to subscribe to.
+    # + timeoutInMilliSeconds - Time to wait until a message is received.
+    # + return - Returns a message or () if the timeout exceeds, or returns an error upon an internal error of the JMS
+    #             provider.
+    public remote function receiveFrom(Destination destination, int timeoutInMilliSeconds = 0) returns (Message|error)?
+    {
+        if (self.config["destination"] is ()) {
+            Error err = error(JMS_ERROR_CODE, message = "Cannot receive from a different destination if the " + 
+                "destination is already set for this Consumer");
+            return err;
+        }
+        check validate(destination);
+        any anyValue = self.config;
+        var config = anyValue.clone();
+        if (config is ConsumerConfiguration) {
+            config["destination"] = destination;
+            var consumer = new Consumer(self.session, config);
+            if (consumer is Consumer) {
+                var result = self->receive(timeoutInMilliSeconds = timeoutInMilliSeconds);
+                var err = consumer.close(self); // Ignore error here
+                return result;
+            } else {
+                return consumer;
+            }
+        } else {
+            Error err = error(JMS_ERROR_CODE, message = "Error cloning the configuration");
+            return err;
+        }
+    }
+
+    public function getConfig() returns ConsumerConfiguration {
+        return self.config;
+    }
+
+    public remote function close() returns error? = external;
 };
 
-# Represent a JMS consumer endpoint
-#
-# + config - Used to store configurations related to a JMS connection
-public type ConsumerTemplate object {
-
-    public ConsumerEndpointConfiguration config = {};
-
-    # Initialize the consumer endpoint
-    #
-    # + c - Configurations related to the endpoint
-    public function init(ConsumerEndpointConfiguration c) {
-
-    }
-
-    # Registers consumer endpoint in the service
-    #
-    # + serviceType - type descriptor of the service
-    public function register(typedesc<service> serviceType) {
-
-    }
-
-    # Starts the consumer endpoint
-    public function start() {
-
-    }
-
-    # Stops the consumer endpoint
-    public function stop() {
-
-    }
-};
-
-# Configurations related to a JMS consumer object
-#
-# + session - JMS session used to create the consumer
-# + identifier - Unique identifier of the consumer
-public type ConsumerEndpointConfiguration record {|
-    Session? session = ();
-    string identifier = "";
+public type ConsumerConfiguration record {|
+    Destination destination?;
+    string  messageSelector?;
+    boolean noLocal = false;
+    string durableId?;
+    string sharedSubscriptionName?;
 |};
