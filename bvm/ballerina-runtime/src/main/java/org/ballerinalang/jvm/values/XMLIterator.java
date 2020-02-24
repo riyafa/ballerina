@@ -21,7 +21,6 @@ import org.apache.axiom.om.OMText;
 import org.ballerinalang.jvm.TypeChecker;
 import org.ballerinalang.jvm.XMLNodeType;
 import org.ballerinalang.jvm.types.TypeTags;
-import org.ballerinalang.jvm.values.api.BString;
 
 /**
  * <p>
@@ -83,11 +82,6 @@ public class XMLIterator {
         private CodePointIterator createCodePointIterator(XMLItem value) {
             return new CodePointIterator(((OMText) value.omNode).getText());
         }
-
-        @Override
-        public StringValue bStringValue() {
-            return null;
-        }
     }
 
     /**
@@ -132,11 +126,6 @@ public class XMLIterator {
             boolean hasMoreXmlItems = cursor < value.sequence.size();
             return iterMode == IterMode.SEQUENCE ? hasMoreXmlItems : (codePointIterator.hasNext() || hasMoreXmlItems);
         }
-
-        @Override
-        public StringValue bStringValue() {
-            return null;
-        }
     }
 
     /**
@@ -172,11 +161,6 @@ public class XMLIterator {
         @Override
         public boolean hasNext() {
             return offset < charSequence.length();
-        }
-
-        @Override
-        public BString bStringValue() {
-            return null;
         }
     }
 }

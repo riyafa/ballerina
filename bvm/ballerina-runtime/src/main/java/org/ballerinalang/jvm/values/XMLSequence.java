@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.OMText;
 import org.ballerinalang.jvm.BallerinaErrors;
+import org.ballerinalang.jvm.StringUtils;
 import org.ballerinalang.jvm.XMLNodeType;
 import org.ballerinalang.jvm.types.BArrayType;
 import org.ballerinalang.jvm.types.BTypes;
@@ -132,7 +133,7 @@ public final class XMLSequence extends XMLValue<ArrayValue> {
         StringBuilder seqTextBuilder = new StringBuilder();
         for (int i = 0; i < sequence.size(); i++) {
             XMLItem item = (XMLItem) sequence.getRefValue(i);
-            seqTextBuilder.append(item.getTextValue().toString());
+            seqTextBuilder.append(item.getTextValue());
         }
         return seqTextBuilder.toString();
     }
@@ -222,7 +223,7 @@ public final class XMLSequence extends XMLValue<ArrayValue> {
         int j = 0;
         for (int i = 0; i < sequence.size(); i++) {
             XMLItem item = (XMLItem) sequence.getRefValue(i);
-            if (item.getNodeType() == XMLNodeType.ELEMENT && item.getElementName().toString().equals(qnameStr)) {
+            if (item.getNodeType() == XMLNodeType.ELEMENT && item.getElementName().equals(qnameStr)) {
                 elementsSeq.add(j++, item);
             }
         }
@@ -458,6 +459,15 @@ public final class XMLSequence extends XMLValue<ArrayValue> {
 
     @Override
     public BString bStringValue() {
+        try {
+            BString bs = StringUtils.fromString("");
+            for (int i = 0; i < sequence.size(); i++) {
+                bs.concat(((RefValue) sequence.getRefValue(i)).bStringValue());
+            }
+            return bs;
+        } catch (Exception t) {
+            handleXmlException("failed to get xml as string: ", t);
+        }
         return null;
     }
 
