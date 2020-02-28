@@ -2554,15 +2554,15 @@ function isBStringFunc(string funcName) returns boolean {
     return funcName.endsWith("$bstring");
 }
 
-function nameOfBStringFunc(string nonBStringFuncName) returns string {
-    return nonBStringFuncName + "$bstring";
-}
-
 function conditionalBStringName(string nonBStringName, boolean useBString) returns string {
     if(useBString) {
         return nameOfBStringFunc(nonBStringName);
     }
     return nonBStringName;
+}
+
+function nameOfBStringFunc(string nonBStringFuncName) returns string {
+    return nonBStringFuncName + "$bstring";
 }
 
 function nameOfNonBStringFunc(string funcName) returns string {

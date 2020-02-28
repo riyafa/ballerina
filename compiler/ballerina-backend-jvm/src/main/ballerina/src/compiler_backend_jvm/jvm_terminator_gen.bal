@@ -507,12 +507,13 @@ type TerminatorGenerator object {
 
         string jvmClass = lookupFullQualifiedClassName(lookupKey);
         string cleanMethodName = cleanupFunctionName(methodName);
-        boolean useBString = IS_BSTRING && orgName == "ballerina" &&
-                             (moduleName == "lang.string" || moduleName == "lang.error" || moduleName == "lang.value" 
-                             || moduleName == "lang.map") && !cleanMethodName.endsWith("_");
+       boolean useBString = IS_BSTRING && !(orgName == "ballerina" && moduleName == "lang.annotations") &&
+            methodName!= "$currentModuleInit" && !cleanMethodName.endsWith("_") &&
+            !cleanMethodName.endsWith("$bstring");
         if (useBString) {
             cleanMethodName = nameOfBStringFunc(cleanMethodName);
         }
+        io:println(moduleName, " ", methodName," ", useBString);
         string methodDesc = lookupJavaMethodDescription(lookupKey, useBString);
         self.mv.visitMethodInsn(INVOKESTATIC, jvmClass, cleanMethodName, methodDesc, false);
     }

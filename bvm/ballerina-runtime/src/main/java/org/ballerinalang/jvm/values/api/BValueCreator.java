@@ -298,7 +298,7 @@ import java.util.function.Function;
       * @return {@code TableValue} with initial data
       */
      public static BTable createTableValue(BType constraintType, ArrayValue keyColumns, ArrayValue dataRows) {
-         return new TableValue(constraintType, keyColumns, dataRows);
+         return new TableValue(constraintType, keyColumns, dataRows, false);
      }
 
      /**

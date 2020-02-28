@@ -103,7 +103,7 @@ public class TableProvider {
         return createTable(fromTableName, null, query, tableType, params);
     }
 
-    public void insertData(String tableName, MapValueImpl<String, Object> constrainedType) {
+    public void insertData(String tableName, MapValueImpl<?, Object> constrainedType) {
         String sqlStmt = TableUtils.generateInsertDataStatement(tableName, constrainedType);
         prepareAndExecuteStatement(sqlStmt, constrainedType);
     }
@@ -307,7 +307,7 @@ public class TableProvider {
         }
     }
 
-    private void prepareAndExecuteStatement(String queryStatement, MapValueImpl<String, Object> constrainedType) {
+    private void prepareAndExecuteStatement(String queryStatement, MapValueImpl<?, Object> constrainedType) {
         PreparedStatement stmt = null;
         Connection conn = this.getConnection();
         try {

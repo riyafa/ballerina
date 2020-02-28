@@ -62,3 +62,22 @@ function testTupleToString() returns int {
     [int, string, string] a = [10, "John🥄", "Silva"];
     return a.toString().length();
 }
+
+function testArrayToString() returns int {
+   string[] arr = ["10", "John🚰", "Silva"];
+    return arr.toString().length();
+}
+
+function testJsonToString() returns int {
+    json j9 = {"smile👍": "smile"};
+    return j9.toString().length();
+}
+
+type Person object {
+    public string name = "Riyafa";
+};
+
+function testObjectToString() returns int {
+    Person p3 = new Person();
+    return p3.toString().length();
+}
