@@ -15,6 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+
 package org.ballerinalang.test.execution;
 
 import org.ballerinalang.test.util.BCompileUtil;
@@ -29,25 +30,6 @@ import org.testng.annotations.Test;
  * @since 1.0.0
  */
 public class ModuleExecutionFlowTests {
-
-    @Test(enabled = false)
-    public void testModuleExecutionOrder() {
-        CompileResult compileResult = BCompileUtil.compile("test-src/execution/proj1", "c", false);
-        ExitDetails output = run(compileResult, new String[]{});
-
-        String expectedString = "Initializing module a\n" +
-                "Initializing module b\n" +
-                "Initializing module c\n" +
-                "Module c main function invoked\n" +
-                "a:ABC listener __start called, service name - ModA\n" +
-                "a:ABC listener __start called, service name - ModB\n" +
-                "a:ABC listener __start called, service name - ModC\n" +
-                "a:ABC listener __gracefulStop called, service name - ModC\n" +
-                "a:ABC listener __gracefulStop called, service name - ModB\n" +
-                "a:ABC listener __gracefulStop called, service name - ModA";
-
-        Assert.assertEquals(output.consoleOutput, expectedString, "evaluated to invalid value");
-    }
 
     @Test
     public void testModuleInitReturningError() {
@@ -113,25 +95,6 @@ public class ModuleExecutionFlowTests {
         Assert.assertEquals(output.errorOutput, expectedErrorString, "evaluated to invalid value");
     }
 
-    @Test(enabled = false)
-    public void testModuleImmediateStopPanic() {
-        CompileResult compileResult = BCompileUtil.compile("test-src/execution/proj6", "c", false);
-        ExitDetails output = run(compileResult, new String[]{});
-
-        String expectedConsoleString = "Initializing module a\n" +
-                "Initializing module b\n" +
-                "Initializing module c\n" +
-                "Module c main function invoked\n" +
-                "a:ABC listener __start called, service name - ModA\n" +
-                "a:ABC listener __start called, service name - ModB\n" +
-                "a:ABC listener __start called, service name - ModC\n" +
-                "a:ABC listener __gracefulStop called, service name - ModC\n" +
-                "a:ABC listener __gracefulStop called, service name - ModB\n" +
-                "a:ABC listener __gracefulStop called, service name - ModA";
-
-        Assert.assertEquals(output.consoleOutput, expectedConsoleString, "evaluated to invalid value");
-    }
-
     @Test
     public void testModuleMainReturnError() {
         CompileResult compileResult = BCompileUtil.compile("test-src/execution/proj7", "c", false);
@@ -180,30 +143,6 @@ public class ModuleExecutionFlowTests {
 
         String expectedErrorString = "error: panicked while starting module 'dependent'\n" +
                 "\tat test.basic.0_1_0.TestListener:__start(main.bal:40)";
-        Assert.assertEquals(output.consoleOutput, expectedConsoleString, "evaluated to invalid value");
-        Assert.assertEquals(output.errorOutput, expectedErrorString, "evaluated to invalid value");
-    }
-
-    @Test(enabled = false)
-    public void testModuleStopPanic() {
-        CompileResult compileResult =
-                BCompileUtil.compile("test-src/execution/ModuleStopFailingProject", "current", false);
-        ExitDetails output = run(compileResult, new String[]{});
-
-        String expectedConsoleString = "Initializing module 'basic'\n" +
-                "Initializing module 'dependent'\n" +
-                "Initializing module 'current'\n" +
-                "main function invoked for current module\n" +
-                "basic:TestListener listener __start called, service name - basic\n" +
-                "basic:TestListener listener __start called, service name - dependent\n" +
-                "basic:TestListener listener __start called, service name - current\n" +
-                "basic:TestListener listener __gracefulStop called, service name - current\n" +
-                "basic:TestListener listener __gracefulStop called, service name - dependent\n" +
-                "listener __gracefulStop panicked, service name - dependent\n" +
-                "basic:TestListener listener __gracefulStop called, service name - basic";
-        String expectedErrorString = "error: panicked while stopping module 'dependent'\n" +
-                "\tat test.basic.0_1_0.TestListener:__gracefulStop(main.bal:44)";
-
         Assert.assertEquals(output.consoleOutput, expectedConsoleString, "evaluated to invalid value");
         Assert.assertEquals(output.errorOutput, expectedErrorString, "evaluated to invalid value");
     }

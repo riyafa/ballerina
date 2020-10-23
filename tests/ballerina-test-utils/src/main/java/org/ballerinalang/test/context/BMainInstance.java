@@ -70,7 +70,7 @@ public class BMainInstance implements BMain {
         configureAgentArgs();
     }
 
-    private void configureAgentArgs() throws BallerinaTestException {
+    private void configureAgentArgs() {
         String jacocoArgLine = System.getProperty("jacoco.agent.argLine");
         if (jacocoArgLine == null || jacocoArgLine.isEmpty()) {
             log.warn("Running integration test without jacoco test coverage");
@@ -187,7 +187,7 @@ public class BMainInstance implements BMain {
 
     }
 
-    private synchronized void addJavaAgents(Map<String, String> envProperties) throws BallerinaTestException {
+    private synchronized void addJavaAgents(Map<String, String> envProperties) {
         String javaOpts = "";
         if (envProperties.containsKey(JAVA_OPTS)) {
             javaOpts = envProperties.get(JAVA_OPTS);
@@ -214,7 +214,26 @@ public class BMainInstance implements BMain {
      * @throws BallerinaTestException if starting services failed
      */
     public void runMain(String command, String[] args, Map<String, String> envProperties, String[] clientArgs,
-                         LogLeecher[] leechers, String commandDir) throws BallerinaTestException {
+                        LogLeecher[] leechers, String commandDir) throws BallerinaTestException {
+        runMain(command, args, envProperties, clientArgs, leechers, commandDir, -1, false);
+    }
+
+    /**
+     * Executing the sh or bat file to start the server.
+     *
+     * @param command          command to run
+     * @param args             command line arguments to pass when executing the sh or bat file
+     * @param envProperties    environmental properties to be appended to the environment
+     * @param clientArgs       arguments which program expects
+     * @param leechers         log leechers to check the log if any
+     * @param commandDir       where to execute the command
+     * @param timeoutInSeconds time to wait before exiting the process
+     * @param force            whether to force exit the process
+     * @throws BallerinaTestException if starting services failed
+     */
+    public void runMain(String command, String[] args, Map<String, String> envProperties, String[] clientArgs,
+                        LogLeecher[] leechers, String commandDir, int timeoutInSeconds, boolean force)
+            throws BallerinaTestException {
         String scriptName;
         if (BCompileUtil.jBallerinaTestsEnabled()) {
             scriptName = Constant.JBALLERINA_SERVER_SCRIPT_NAME;
@@ -263,8 +282,24 @@ public class BMainInstance implements BMain {
             if (clientArgs != null && clientArgs.length > 0) {
                 writeClientArgsToProcess(clientArgs, process);
             }
-            process.waitFor();
+            if (timeoutInSeconds < 0) {
+                process.waitFor();
+            } else {
+                if (!process.waitFor(timeoutInSeconds, TimeUnit.SECONDS)) {
+                    if (force) {
+                        process.destroyForcibly();
+                    } else {
+                        Runtime rt = Runtime.getRuntime();
+                        if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
+                            rt.exec("taskkill " + process.pid());
+                        } else {
+                            rt.exec("kill -9 " + process.pid());
+                        }
 
+                        process.destroy();
+                    }
+                }
+            }
             serverInfoLogReader.stop();
             serverInfoLogReader.removeAllLeechers();
 
