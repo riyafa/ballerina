@@ -39,6 +39,7 @@
             <package name="org.ballerinalang.test.imports.*"/>
 <!--            <package name="org.ballerinalang.test.parser.*"/>-->
             <package name="org.ballerinalang.test.closures.*"/>
+            <package name="org.ballerinalang.test.cli.*"/>
             <package name="org.ballerinalang.test.bir.*"/>
 
              <package name="org.ballerinalang.test.dataflow.analysis.*"/>
